@@ -252,3 +252,24 @@ QuickVoice is built in public for teams that want programmable, inspectable phon
 ## License
 
 AGPL-3.0-only. See [LICENSE](./LICENSE).
+
+## Langfuse Integration
+
+### Changes Made
+
+- Added Langfuse SDK integration
+- Configured OpenTelemetry TracerProvider
+- Connected LiveKit telemetry using `set_tracer_provider`
+- Added Langfuse environment variables
+- Added graceful trace flushing during shutdown
+
+### Environment Variables
+
+LANGFUSE_PUBLIC_KEY
+LANGFUSE_SECRET_KEY
+LANGFUSE_BASE_URL
+
+### Note
+
+The public QuickVoice repository ships with placeholder LiveKit credentials.
+End-to-end verification requires valid LiveKit credentials.
