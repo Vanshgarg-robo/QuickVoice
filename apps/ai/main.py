@@ -1,5 +1,9 @@
 from dotenv import load_dotenv
 
+from langfuse import Langfuse
+from opentelemetry.sdk.trace import TracerProvider
+from livekit.agents.telemetry import set_tracer_provider
+
 from livekit import agents, rtc
 from livekit.agents import (
     AgentSession,
@@ -507,6 +511,20 @@ async def entrypoint(ctx: JobContext):
             }
         ),
     )
+    # ---------- Langfuse / OpenTelemetry ----------
+    trace_provider = TracerProvider()
+
+    set_tracer_provider(
+        trace_provider,
+        metadata={
+            "langfuse.session.id": ctx.room.name,
+        },
+    )
+
+    langfuse = Langfuse(
+    tracer_provider=trace_provider,
+    should_export_span=lambda span: True,
+)
     session = AgentSession(
         **provider_kwargs,
         vad=silero.VAD.load(),
@@ -612,6 +630,8 @@ async def entrypoint(ctx: JobContext):
             await call_finalizer.finalize()
         except Exception as error:
             logger.error("[CALL_LOG] Failed to finalize completed call: {}", redact_sensitive(str(error)))
+            
+        trace_provider.force_flush()
 
     if hasattr(ctx, "add_shutdown_callback"):
         ctx.add_shutdown_callback(unified_shutdown_hook)
